@@ -2,9 +2,5 @@ aiogram
 asyncpg
 SQLAlchemy
 python-dotenv
-easyocr
-opencv-python-headless
-torch
-torchvision
+openai
 Pillow
-numpy

@@ -16,6 +16,12 @@ class SessionStatus(enum.Enum):
     COMPLETED = "completed"  # Everyone confirmed
 
 
+class PaymentStatus(enum.Enum):
+    PENDING = "pending"
+    PAID = "paid"
+    CONFIRMED = "confirmed"
+
+
 class Session(Base):
     __tablename__ = "sessions"
     
@@ -26,12 +32,16 @@ class Session(Base):
     
     restaurant_name: Mapped[str] = mapped_column(String(255), nullable=True)
     total_amount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)
-    receipt_image_id: Mapped[str] = mapped_column(String(255))  # Telegram file_id
-    receipt_text: Mapped[str] = mapped_column(Text)  # OCR extracted text
+    receipt_image_id: Mapped[str] = mapped_column(String(255))
+    receipt_text: Mapped[str] = mapped_column(Text)
     
     card_number: Mapped[str] = mapped_column(String(20), nullable=True)
     participant_count: Mapped[int] = mapped_column(Integer, nullable=True)
     has_delivery: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    # NEW: Calculated totals
+    shared_total: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)  # Total of shared meals
+    individual_total: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)  # Total of individual meals
     
     status: Mapped[SessionStatus] = mapped_column(SQLEnum(SessionStatus), default=SessionStatus.CREATING)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -57,7 +67,15 @@ class SessionParticipant(Base):
     is_creator: Mapped[bool] = mapped_column(Boolean, default=False)
     is_delivery_person: Mapped[bool] = mapped_column(Boolean, default=False)
     has_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
-    total_amount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)
+    
+    # NEW: Payment tracking
+    payment_status: Mapped[PaymentStatus] = mapped_column(SQLEnum(PaymentStatus), default=PaymentStatus.PENDING)
+    paid_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    
+    # NEW: Calculated amounts
+    individual_total: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)  # User's individual meals
+    shared_portion: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)  # User's share of shared meals
+    total_amount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=True)  # individual_total + shared_portion
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
@@ -77,11 +95,11 @@ class Meal(Base):
     
     name: Mapped[str] = mapped_column(String(255))
     price: Mapped[float] = mapped_column(Numeric(10, 2))
-    quantity_available: Mapped[int] = mapped_column(Integer, default=1)  # From receipt
+    quantity_available: Mapped[int] = mapped_column(Integer, default=1)
     
-    is_shared: Mapped[bool] = mapped_column(Boolean, default=False)  # Marked by creator
-    is_delivery: Mapped[bool] = mapped_column(Boolean, default=False)  # Marked by creator
-    position: Mapped[int] = mapped_column(Integer)  # Order in receipt
+    is_shared: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_delivery: Mapped[bool] = mapped_column(Boolean, default=False)
+    position: Mapped[int] = mapped_column(Integer)
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     

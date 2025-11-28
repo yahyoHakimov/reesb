@@ -1,5 +1,5 @@
 from database.connection import init_db, get_session, async_session_maker
-from database.models import Session, SessionParticipant, Meal, UserMealSelection, SessionStatus
+from database.models import Session, SessionParticipant, Meal, UserMealSelection, SessionStatus, PaymentStatus
 
 __all__ = [
     'init_db', 
@@ -9,5 +9,6 @@ __all__ = [
     'SessionParticipant', 
     'Meal', 
     'UserMealSelection',
-    'SessionStatus'
+    'SessionStatus',
+    'PaymentStatus'
 ]

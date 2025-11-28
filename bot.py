@@ -7,7 +7,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
 from database.connection import init_db
-from handlers import start_router, receipt_router
+from handlers import start_router, receipt_router, session_setup_router, meal_selection_router
 from middleware import LoggingMiddleware
 
 # Configure logging
@@ -28,7 +28,8 @@ async def main():
     
     try:
         logger.info("📊 Initializing database...")
-        await init_db()
+        
+        await init_db(reset=True)
         logger.info("✅ Database initialized!")
     except Exception as e:
         logger.error(f"❌ Failed to initialize database: {e}")
@@ -52,6 +53,8 @@ async def main():
         logger.info("📝 Registering handlers...")
         dp.include_router(start_router)
         dp.include_router(receipt_router)
+        dp.include_router(session_setup_router)
+        dp.include_router(meal_selection_router)
 
         logger.info("=" * 70)
         logger.info("✅ Bot started successfully!")

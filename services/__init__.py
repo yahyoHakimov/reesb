@@ -1,3 +1,3 @@
-from services.ocr_service import OCRService
+from services.ai_service import AIService
 
-__all__ = ['OCRService']
+__all__ = ['AIService']
